@@ -23,6 +23,10 @@ from environment import Microstructure
 from astar_search import AStarCrackSearch, CrackResult
 
 
+<<<<<<< HEAD
+# ─── Dijkstra Search (A* with h=0) ───────────────────────────────────────────
+=======
+>>>>>>> 58ac925b4724f323d8490e7cc1ddada4a3d1fd93
 
 class DijkstraSearch:
     """Dijkstra's algorithm — optimal but explores more nodes than A*."""
@@ -84,6 +88,7 @@ class DijkstraSearch:
                            len(closed_set), exploration_order)
 
 
+# ─── Greedy Best-First Search (only h, no g) ─────────────────────────────────
 
 class GreedyBestFirstSearch:
     """Greedy best-first — fast but suboptimal. Uses only heuristic."""
@@ -92,6 +97,7 @@ class GreedyBestFirstSearch:
         self.micro = microstructure
 
     def _heuristic(self, r, c):
+        """Greedy heuristic: prefer nodes close to right boundary with low toughness."""
         dist = (self.micro.width - 1) - c
         local_toughness = self.micro.toughness_grid[r, c]
         return dist * local_toughness
@@ -150,6 +156,7 @@ class GreedyBestFirstSearch:
                            len(closed_set), exploration_order)
 
 
+# ─── BFS (Unweighted — shortest hop count) ───────────────────────────────────
 
 class BFSSearch:
     """BFS — finds shortest-hop path, completely ignores edge costs."""
@@ -179,6 +186,7 @@ class BFSSearch:
 
             if cc == goal_col:
                 path = _reconstruct(came_from, current)
+                
                 # Calculate actual cost along the BFS path
                 total_cost = sum(
                     micro.edge_cost(path[i][0], path[i][1], path[i+1][0], path[i+1][1])
@@ -207,6 +215,7 @@ class BFSSearch:
                            len(visited), exploration_order)
 
 
+# ─── Helper ──────────────────────────────────────────────────────────────────
 
 def _reconstruct(came_from, current):
     path = [current]
@@ -217,6 +226,7 @@ def _reconstruct(came_from, current):
     return path
 
 
+# ─── Run All Algorithms ──────────────────────────────────────────────────────
 
 @dataclass
 class ComparisonResult:
@@ -257,6 +267,7 @@ def compare_algorithms(
     return results
 
 
+# ─── Comparison Visualization ─────────────────────────────────────────────────
 
 def plot_comparison(
     microstructure: Microstructure,
@@ -271,6 +282,7 @@ def plot_comparison(
     fig.suptitle("Algorithm Comparison — Crack Propagation",
                  fontsize=18, fontweight="bold")
 
+    # Build RGB base image
     micro = microstructure
     rgb = np.zeros((micro.height, micro.width, 3))
     for pid, color in PHASE_COLORS.items():
@@ -278,8 +290,10 @@ def plot_comparison(
         for c_idx in range(3):
             rgb[:, :, c_idx][mask] = color[c_idx]
 
+    # Color scheme for algorithms
     algo_colors = ["#FF4444", "#4488FF", "#FF8800", "#44CC44"]
 
+    # ── Top row: 2×2 crack path panels ──
     for i, comp in enumerate(results):
         ax = fig.add_subplot(3, 2, i + 1)
         ax.imshow(rgb, origin="upper", aspect="equal")
@@ -295,6 +309,7 @@ def plot_comparison(
             ax.plot(pc[-1], pr[-1], "X", color=end_color, markersize=10,
                     markeredgecolor="white", markeredgewidth=1.5)
 
+        # Show explored area
         if res.exploration_order:
             er = [p[0] for p in res.exploration_order]
             ec = [p[1] for p in res.exploration_order]
@@ -306,14 +321,19 @@ def plot_comparison(
         ax.set_xlim(-0.5, micro.width - 0.5)
         ax.set_ylim(micro.height - 0.5, -0.5)
 
+    # ── Bottom row: Bar charts ──
     names = [c.algorithm for c in results]
     costs = [c.result.total_cost for c in results]
     nodes = [c.result.nodes_explored for c in results]
     times = [c.time_seconds for c in results]
+
+    # Cost comparison
     ax_cost = fig.add_subplot(3, 2, 5)
     bars = ax_cost.bar(names, costs, color=algo_colors, alpha=0.85, edgecolor="white")
     ax_cost.set_ylabel("Total Path Cost (Energy)", fontsize=10)
     ax_cost.set_title("Path Cost Comparison (lower = better)", fontsize=11)
+
+    # Highlight optimal
     min_cost = min(costs)
     for bar, cost in zip(bars, costs):
         if abs(cost - min_cost) < 1e-6:
@@ -321,6 +341,7 @@ def plot_comparison(
             bar.set_linewidth(3)
     ax_cost.tick_params(axis='x', labelsize=8)
 
+    # Nodes explored comparison
     ax_nodes = fig.add_subplot(3, 2, 6)
     bars = ax_nodes.bar(names, nodes, color=algo_colors, alpha=0.85, edgecolor="white")
     ax_nodes.set_ylabel("Nodes Explored", fontsize=10)
@@ -346,6 +367,7 @@ def plot_comparison(
     return fig
 
 
+# ─── Quick Test ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     print("Generating microstructure...")
