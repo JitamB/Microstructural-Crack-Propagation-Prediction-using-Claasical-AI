@@ -23,10 +23,7 @@ from environment import Microstructure
 from astar_search import AStarCrackSearch, CrackResult
 
 
-<<<<<<< HEAD
 # ─── Dijkstra Search (A* with h=0) ───────────────────────────────────────────
-=======
->>>>>>> 58ac925b4724f323d8490e7cc1ddada4a3d1fd93
 
 class DijkstraSearch:
     """Dijkstra's algorithm — optimal but explores more nodes than A*."""
